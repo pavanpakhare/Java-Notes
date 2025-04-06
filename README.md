@@ -601,5 +601,419 @@ class Calculator {
     }
 }
 ```
+# **Advanced Java Tutorial**  
+*(Beyond Intermediate: Concurrency, Design Patterns, Performance, and More)*  
+
+This tutorial covers **advanced Java concepts** that are essential for building **high-performance, scalable, and maintainable** applications.  
+
+---
+
+## **Table of Contents**  
+1. [**Advanced Concurrency**](#advanced-concurrency)  
+   - Thread Pools & Executors  
+   - CompletableFuture  
+   - Concurrent Collections  
+   - Atomic Variables  
+   - Fork/Join Framework  
+
+2. [**Memory Management & Performance**](#memory-management--performance)  
+   - JVM Memory Model  
+   - Garbage Collection Tuning  
+   - Profiling with VisualVM  
+   - Benchmarking with JMH  
+
+3. [**Design Patterns in Java**](#design-patterns-in-java)  
+   - Singleton (Thread-Safe)  
+   - Factory & Abstract Factory  
+   - Builder  
+   - Observer  
+   - Strategy  
+
+4. [**Java Reflection & Metaprogramming**](#java-reflection--metaprogramming)  
+   - Inspecting Classes at Runtime  
+   - Dynamic Method Invocation  
+   - Annotation Processing  
+
+5. [**Java Networking & NIO**](#java-networking--nio)  
+   - Non-blocking I/O (NIO, NIO.2)  
+   - WebSockets  
+   - HTTP Client (Java 11+)  
+
+6. [**Functional Programming in Java**](#functional-programming-in-java)  
+   - Method References  
+   - Custom Functional Interfaces  
+   - Monads (Optional, Stream)  
+
+7. [**Java Modules (JPMS)**](#java-modules-jpms)  
+   - Creating Modular Applications  
+   - `module-info.java`  
+   - Dependency Management  
+
+8. [**Security in Java**](#security-in-java)  
+   - Cryptography (AES, RSA)  
+   - Secure Coding Practices  
+   - OAuth2 & JWT  
+
+9. [**Java Native Interface (JNI)**](#java-native-interface-jni)  
+   - Calling C/C++ from Java  
+
+10. [**Best Practices & Anti-Patterns**](#best-practices--anti-patterns)  
+
+---
+
+## **1. Advanced Concurrency**  
+
+### **Thread Pools & Executors**  
+Instead of manually managing threads, use `ExecutorService`:  
+```java
+ExecutorService executor = Executors.newFixedThreadPool(4);
+executor.submit(() -> {
+    System.out.println("Task running in thread: " + Thread.currentThread().getName());
+});
+executor.shutdown();
+```
+
+### **CompletableFuture (Asynchronous Programming)**  
+```java
+CompletableFuture.supplyAsync(() -> fetchDataFromAPI())
+    .thenApply(data -> processData(data))
+    .thenAccept(result -> System.out.println(result))
+    .exceptionally(ex -> {
+        System.err.println("Error: " + ex.getMessage());
+        return null;
+    });
+```
+
+### **Concurrent Collections**  
+- `ConcurrentHashMap` (thread-safe `HashMap`)  
+- `CopyOnWriteArrayList` (thread-safe `ArrayList`)  
+- `BlockingQueue` (for producer-consumer patterns)  
+
+### **Atomic Variables (Lock-Free Programming)**  
+```java
+AtomicInteger counter = new AtomicInteger(0);
+counter.incrementAndGet(); // Thread-safe increment
+```
+
+### **Fork/Join Framework (Parallel Processing)**  
+```java
+class FibonacciTask extends RecursiveTask<Integer> {
+    final int n;
+    FibonacciTask(int n) { this.n = n; }
+    
+    protected Integer compute() {
+        if (n <= 1) return n;
+        FibonacciTask f1 = new FibonacciTask(n - 1);
+        f1.fork();
+        FibonacciTask f2 = new FibonacciTask(n - 2);
+        return f2.compute() + f1.join();
+    }
+}
+```
+
+---
+
+## **2. Memory Management & Performance**  
+
+### **JVM Memory Model**  
+- **Heap**: Objects live here (Young + Old Gen)  
+- **Stack**: Method calls & local variables  
+- **Metaspace**: Class metadata (replaced PermGen)  
+
+### **Garbage Collection Tuning**  
+- **`-Xms` & `-Xmx`**: Set min/max heap size  
+- **`-XX:+UseG1GC`**: Enable G1 Garbage Collector (low-latency)  
+
+### **Profiling with VisualVM**  
+- Attach to a running Java process  
+- Analyze CPU, memory, threads  
+
+### **Benchmarking with JMH**  
+```java
+@BenchmarkMode(Mode.AverageTime)
+@OutputTimeUnit(TimeUnit.NANOSECONDS)
+public class MyBenchmark {
+    @Benchmark
+    public void testMethod() {
+        // Code to benchmark
+    }
+}
+```
+Run with:  
+```bash
+mvn clean install
+java -jar target/benchmarks.jar
+```
+
+---
+
+## **3. Design Patterns in Java**  
+
+### **Singleton (Thread-Safe)**  
+```java
+public class Singleton {
+    private static volatile Singleton instance;
+    
+    private Singleton() {}
+    
+    public static Singleton getInstance() {
+        if (instance == null) {
+            synchronized (Singleton.class) {
+                if (instance == null) {
+                    instance = new Singleton();
+                }
+            }
+        }
+        return instance;
+    }
+}
+```
+
+### **Factory Pattern**  
+```java
+interface Vehicle { void drive(); }
+class Car implements Vehicle { public void drive() { System.out.println("Driving car"); } }
+class Bike implements Vehicle { public void drive() { System.out.println("Riding bike"); } }
+
+class VehicleFactory {
+    public static Vehicle createVehicle(String type) {
+        return switch (type) {
+            case "car" -> new Car();
+            case "bike" -> new Bike();
+            default -> throw new IllegalArgumentException("Unknown vehicle");
+        };
+    }
+}
+```
+
+### **Builder Pattern (Immutable Objects)**  
+```java
+public class Person {
+    private final String name;
+    private final int age;
+    
+    private Person(Builder builder) {
+        this.name = builder.name;
+        this.age = builder.age;
+    }
+    
+    public static class Builder {
+        private String name;
+        private int age;
+        
+        public Builder name(String name) { this.name = name; return this; }
+        public Builder age(int age) { this.age = age; return this; }
+        public Person build() { return new Person(this); }
+    }
+}
+
+// Usage:
+Person person = new Person.Builder().name("Alice").age(25).build();
+```
+
+---
+
+## **4. Java Reflection & Metaprogramming**  
+
+### **Inspecting Classes at Runtime**  
+```java
+Class<?> clazz = Class.forName("java.lang.String");
+Method[] methods = clazz.getDeclaredMethods();
+Field[] fields = clazz.getDeclaredFields();
+```
+
+### **Dynamic Method Invocation**  
+```java
+Method method = clazz.getMethod("substring", int.class, int.class);
+String result = (String) method.invoke("Hello World", 0, 5);
+System.out.println(result); // "Hello"
+```
+
+### **Annotation Processing**  
+```java
+@Retention(RetentionPolicy.RUNTIME)
+@interface Loggable {}
+
+class Service {
+    @Loggable
+    public void doWork() { System.out.println("Working..."); }
+}
+
+// Check if method has annotation
+Method method = Service.class.getMethod("doWork");
+if (method.isAnnotationPresent(Loggable.class)) {
+    System.out.println("Method is loggable");
+}
+```
+
+---
+
+## **5. Java Networking & NIO**  
+
+### **Non-blocking I/O (NIO.2)**  
+```java
+Path path = Paths.get("file.txt");
+Files.readAllLines(path).forEach(System.out::println);
+
+// Asynchronous File I/O
+CompletableFuture<String> future = CompletableFuture.supplyAsync(() -> {
+    try {
+        return Files.readString(path);
+    } catch (IOException e) {
+        throw new RuntimeException(e);
+    }
+});
+```
+
+### **HTTP Client (Java 11+)**  
+```java
+HttpClient client = HttpClient.newHttpClient();
+HttpRequest request = HttpRequest.newBuilder()
+    .uri(URI.create("https://api.example.com/data"))
+    .build();
+
+HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+System.out.println(response.body());
+```
+
+---
+
+## **6. Functional Programming in Java**  
+
+### **Method References**  
+```java
+List<String> names = Arrays.asList("Alice", "Bob", "Charlie");
+names.forEach(System.out::println); // Equivalent to `x -> System.out.println(x)`
+```
+
+### **Custom Functional Interfaces**  
+```java
+@FunctionalInterface
+interface TriFunction<A, B, C, R> {
+    R apply(A a, B b, C c);
+}
+
+TriFunction<Integer, Integer, Integer, Integer> sum = (a, b, c) -> a + b + c;
+System.out.println(sum.apply(1, 2, 3)); // 6
+```
+
+### **Monads (Optional, Stream)**  
+```java
+Optional<String> name = Optional.ofNullable(getName());
+String result = name.orElse("default");
+
+List<Integer> numbers = List.of(1, 2, 3, 4, 5);
+int sum = numbers.stream()
+    .filter(n -> n % 2 == 0)
+    .mapToInt(n -> n * 2)
+    .sum();
+```
+
+---
+
+## **7. Java Modules (JPMS)**  
+
+### **`module-info.java`**  
+```java
+module com.myapp {
+    requires java.base;
+    requires java.sql;
+    exports com.myapp.api;
+}
+```
+
+### **Running Modular Apps**  
+```bash
+javac --module-path lib -d out src/module-info.java src/com/myapp/*.java
+java --module-path out -m com.myapp/com.myapp.Main
+```
+
+---
+
+## **8. Security in Java**  
+
+### **Cryptography (AES Encryption)**  
+```java
+Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+SecretKey key = KeyGenerator.getInstance("AES").generateKey();
+cipher.init(Cipher.ENCRYPT_MODE, key);
+byte[] encrypted = cipher.doFinal("Secret Message".getBytes());
+```
+
+### **JWT (JSON Web Tokens)**  
+```java
+String token = Jwts.builder()
+    .setSubject("user123")
+    .signWith(SignatureAlgorithm.HS256, "secretKey")
+    .compact();
+```
+
+---
+
+## **9. Java Native Interface (JNI)**  
+
+### **Calling C from Java**  
+1. Declare native method:  
+```java
+public class NativeDemo {
+    public native void sayHello();
+    
+    static { System.loadLibrary("hello"); }
+    
+    public static void main(String[] args) {
+        new NativeDemo().sayHello();
+    }
+}
+```
+2. Generate header file:  
+```bash
+javac -h . NativeDemo.java
+```
+3. Implement in C (`NativeDemo.c`):  
+```c
+#include <jni.h>
+#include <stdio.h>
+#include "NativeDemo.h"
+
+JNIEXPORT void JNICALL Java_NativeDemo_sayHello(JNIEnv *env, jobject obj) {
+    printf("Hello from C!\n");
+}
+```
+4. Compile & Run:  
+```bash
+gcc -shared -o libhello.so -I${JAVA_HOME}/include -I${JAVA_HOME}/include/linux NativeDemo.c
+java -Djava.library.path=. NativeDemo
+```
+
+---
+
+## **10. Best Practices & Anti-Patterns**  
+
+✅ **Do:**  
+- Use `try-with-resources` for `AutoCloseable`  
+- Prefer **immutable objects**  
+- Use `Optional` instead of `null` checks  
+- Follow **SOLID principles**  
+
+❌ **Avoid:**  
+- **Global variables**  
+- **Raw types** (use generics)  
+- **Synchronized on `this`** (use private locks)  
+- **Deep inheritance hierarchies** (prefer composition)  
+
+---
+
+### **Conclusion**  
+This **advanced Java tutorial** covered:  
+- **Concurrency** (Fork/Join, CompletableFuture)  
+- **Performance tuning** (GC, JMH)  
+- **Design Patterns** (Singleton, Builder)  
+- **Reflection & NIO**  
+- **Security & JNI**  
+
+Next steps:  
+- **Spring Framework** (Dependency Injection, Spring Boot)  
+- **Microservices** (Quarkus, Micronaut)  
+- **Reactive Programming** (Project Reactor) 
 
 

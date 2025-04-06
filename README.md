@@ -257,3 +257,692 @@ public void checkAge(int age) throws Exception {
 }
 ```
 
+# Java Intermediate Tutorial
+
+This intermediate Java tutorial builds on the basics and covers more advanced concepts that are essential for becoming a proficient Java developer.
+
+## Table of Contents
+1. [Collections Framework](#collections-framework)
+2. [Generics](#generics)
+3. [Input/Output (I/O) Streams](#inputoutput-io-streams)
+4. [Multithreading](#multithreading)
+5. [Lambda Expressions](#lambda-expressions)
+6. [Stream API](#stream-api)
+7. [Java Date and Time API](#java-date-and-time-api)
+8. [Annotations](#annotations)
+9. [Java Database Connectivity (JDBC)](#java-database-connectivity-jdbc)
+10. [Unit Testing with JUnit](#unit-testing-with-junit)
+
+## Collections Framework
+
+The Java Collections Framework provides implementations of common data structures.
+
+### Main Interfaces
+- `List` - Ordered collection (ArrayList, LinkedList)
+- `Set` - Unique elements (HashSet, TreeSet)
+- `Queue` - FIFO (LinkedList, PriorityQueue)
+- `Map` - Key-value pairs (HashMap, TreeMap)
+
+### Examples
+```java
+// ArrayList
+List<String> names = new ArrayList<>();
+names.add("Alice");
+names.add("Bob");
+names.get(0); // "Alice"
+
+// HashSet
+Set<Integer> numbers = new HashSet<>();
+numbers.add(1);
+numbers.add(1); // Duplicate ignored
+
+// HashMap
+Map<String, Integer> ages = new HashMap<>();
+ages.put("Alice", 25);
+ages.put("Bob", 30);
+ages.get("Alice"); // 25
+```
+
+## Generics
+
+Generics provide type safety and eliminate the need for casting.
+
+```java
+// Generic class
+public class Box<T> {
+    private T content;
+    
+    public void setContent(T content) {
+        this.content = content;
+    }
+    
+    public T getContent() {
+        return content;
+    }
+}
+
+// Usage
+Box<String> stringBox = new Box<>();
+stringBox.setContent("Hello");
+String value = stringBox.getContent(); // No casting needed
+
+// Generic methods
+public <T> void printArray(T[] array) {
+    for (T element : array) {
+        System.out.println(element);
+    }
+}
+```
+
+## Input/Output (I/O) Streams
+
+Java I/O is used for reading from and writing to files, network connections, etc.
+
+### File I/O
+```java
+// Writing to a file
+try (BufferedWriter writer = new BufferedWriter(new FileWriter("file.txt"))) {
+    writer.write("Hello, World!");
+} catch (IOException e) {
+    e.printStackTrace();
+}
+
+// Reading from a file
+try (BufferedReader reader = new BufferedReader(new FileReader("file.txt"))) {
+    String line;
+    while ((line = reader.readLine()) != null) {
+        System.out.println(line);
+    }
+} catch (IOException e) {
+    e.printStackTrace();
+}
+```
+
+### Serialization
+```java
+public class Person implements Serializable {
+    private String name;
+    private int age;
+    // constructors, getters, setters
+}
+
+// Serialize
+try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("person.ser"))) {
+    oos.writeObject(new Person("Alice", 25));
+}
+
+// Deserialize
+try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("person.ser"))) {
+    Person person = (Person) ois.readObject();
+    System.out.println(person.getName());
+}
+```
+
+## Multithreading
+
+Java supports multithreading for concurrent programming.
+
+### Creating Threads
+```java
+// Extending Thread class
+class MyThread extends Thread {
+    public void run() {
+        System.out.println("Thread is running");
+    }
+}
+
+// Implementing Runnable interface
+class MyRunnable implements Runnable {
+    public void run() {
+        System.out.println("Runnable is running");
+    }
+}
+
+// Usage
+Thread thread1 = new MyThread();
+Thread thread2 = new Thread(new MyRunnable());
+thread1.start();
+thread2.start();
+```
+
+### Synchronization
+```java
+class Counter {
+    private int count = 0;
+    
+    public synchronized void increment() {
+        count++;
+    }
+    
+    public int getCount() {
+        return count;
+    }
+}
+```
+
+### Executor Framework
+```java
+ExecutorService executor = Executors.newFixedThreadPool(5);
+for (int i = 0; i < 10; i++) {
+    executor.execute(() -> {
+        System.out.println("Task executed by " + Thread.currentThread().getName());
+    });
+}
+executor.shutdown();
+```
+
+## Lambda Expressions
+
+Lambda expressions provide a concise way to implement functional interfaces.
+
+```java
+// Before Java 8
+Runnable r = new Runnable() {
+    public void run() {
+        System.out.println("Hello");
+    }
+};
+
+// With lambda
+Runnable r = () -> System.out.println("Hello");
+
+// Functional interfaces
+interface MathOperation {
+    int operate(int a, int b);
+}
+
+MathOperation add = (a, b) -> a + b;
+System.out.println(add.operate(5, 3)); // 8
+```
+
+## Stream API
+
+The Stream API provides functional-style operations on streams of elements.
+
+```java
+List<String> names = Arrays.asList("Alice", "Bob", "Charlie", "David");
+
+// Filter and map
+List<String> result = names.stream()
+    .filter(name -> name.startsWith("A"))
+    .map(String::toUpperCase)
+    .collect(Collectors.toList());
+
+// forEach
+names.stream().forEach(System.out::println);
+
+// reduce
+int sum = IntStream.range(1, 5).reduce(0, (a, b) -> a + b);
+```
+
+## Java Date and Time API
+
+Java 8 introduced a new Date and Time API in the `java.time` package.
+
+```java
+// Current date
+LocalDate today = LocalDate.now();
+
+// Specific date
+LocalDate birthday = LocalDate.of(1990, Month.JANUARY, 1);
+
+// Date arithmetic
+LocalDate nextWeek = today.plusWeeks(1);
+
+// Formatting
+DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+String formattedDate = today.format(formatter);
+
+// Parsing
+LocalDate parsedDate = LocalDate.parse("25/12/2023", formatter);
+
+// Duration and Period
+Duration duration = Duration.between(LocalTime.now(), LocalTime.now().plusHours(2));
+Period period = Period.between(LocalDate.now(), LocalDate.now().plusDays(10));
+```
+
+## Annotations
+
+Annotations provide metadata about the code.
+
+### Built-in Annotations
+```java
+@Override
+public String toString() {
+    return "Custom toString";
+}
+
+@Deprecated
+public void oldMethod() {}
+
+@SuppressWarnings("unchecked")
+List list = new ArrayList();
+```
+
+### Custom Annotations
+```java
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+public @interface TestAnnotation {
+    String value() default "default";
+    int count() default 1;
+}
+
+// Usage
+@TestAnnotation(value = "test", count = 5)
+public void annotatedMethod() {}
+```
+
+## Java Database Connectivity (JDBC)
+
+JDBC is used to connect to databases.
+
+```java
+// Connection setup
+String url = "jdbc:mysql://localhost:3306/mydb";
+String username = "user";
+String password = "pass";
+
+try (Connection connection = DriverManager.getConnection(url, username, password)) {
+    // Statement
+    Statement statement = connection.createStatement();
+    ResultSet rs = statement.executeQuery("SELECT * FROM users");
+    
+    // PreparedStatement (prevents SQL injection)
+    PreparedStatement ps = connection.prepareStatement("INSERT INTO users VALUES (?, ?)");
+    ps.setString(1, "Alice");
+    ps.setInt(2, 25);
+    ps.executeUpdate();
+    
+    // Processing ResultSet
+    while (rs.next()) {
+        String name = rs.getString("name");
+        int age = rs.getInt("age");
+        System.out.println(name + ": " + age);
+    }
+} catch (SQLException e) {
+    e.printStackTrace();
+}
+```
+
+## Unit Testing with JUnit
+
+JUnit is a popular testing framework for Java.
+
+```java
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+class CalculatorTest {
+    
+    @Test
+    void testAdd() {
+        Calculator calculator = new Calculator();
+        assertEquals(5, calculator.add(2, 3));
+    }
+    
+    @Test
+    void testDivide() {
+        Calculator calculator = new Calculator();
+        assertThrows(ArithmeticException.class, () -> calculator.divide(1, 0));
+    }
+}
+
+class Calculator {
+    public int add(int a, int b) {
+        return a + b;
+    }
+    
+    public int divide(int a, int b) {
+        if (b == 0) {
+            throw new ArithmeticException("Division by zero");
+        }
+        return a / b;
+    }
+}
+```
+
+# Java Intermediate Tutorial
+
+This intermediate Java tutorial builds on the basics and covers more advanced concepts that are essential for becoming a proficient Java developer.
+
+## Table of Contents
+1. [Collections Framework](#collections-framework)
+2. [Generics](#generics)
+3. [Input/Output (I/O) Streams](#inputoutput-io-streams)
+4. [Multithreading](#multithreading)
+5. [Lambda Expressions](#lambda-expressions)
+6. [Stream API](#stream-api)
+7. [Java Date and Time API](#java-date-and-time-api)
+8. [Annotations](#annotations)
+9. [Java Database Connectivity (JDBC)](#java-database-connectivity-jdbc)
+10. [Unit Testing with JUnit](#unit-testing-with-junit)
+
+## Collections Framework
+
+The Java Collections Framework provides implementations of common data structures.
+
+### Main Interfaces
+- `List` - Ordered collection (ArrayList, LinkedList)
+- `Set` - Unique elements (HashSet, TreeSet)
+- `Queue` - FIFO (LinkedList, PriorityQueue)
+- `Map` - Key-value pairs (HashMap, TreeMap)
+
+### Examples
+```java
+// ArrayList
+List<String> names = new ArrayList<>();
+names.add("Alice");
+names.add("Bob");
+names.get(0); // "Alice"
+
+// HashSet
+Set<Integer> numbers = new HashSet<>();
+numbers.add(1);
+numbers.add(1); // Duplicate ignored
+
+// HashMap
+Map<String, Integer> ages = new HashMap<>();
+ages.put("Alice", 25);
+ages.put("Bob", 30);
+ages.get("Alice"); // 25
+```
+
+## Generics
+
+Generics provide type safety and eliminate the need for casting.
+
+```java
+// Generic class
+public class Box<T> {
+    private T content;
+    
+    public void setContent(T content) {
+        this.content = content;
+    }
+    
+    public T getContent() {
+        return content;
+    }
+}
+
+// Usage
+Box<String> stringBox = new Box<>();
+stringBox.setContent("Hello");
+String value = stringBox.getContent(); // No casting needed
+
+// Generic methods
+public <T> void printArray(T[] array) {
+    for (T element : array) {
+        System.out.println(element);
+    }
+}
+```
+
+## Input/Output (I/O) Streams
+
+Java I/O is used for reading from and writing to files, network connections, etc.
+
+### File I/O
+```java
+// Writing to a file
+try (BufferedWriter writer = new BufferedWriter(new FileWriter("file.txt"))) {
+    writer.write("Hello, World!");
+} catch (IOException e) {
+    e.printStackTrace();
+}
+
+// Reading from a file
+try (BufferedReader reader = new BufferedReader(new FileReader("file.txt"))) {
+    String line;
+    while ((line = reader.readLine()) != null) {
+        System.out.println(line);
+    }
+} catch (IOException e) {
+    e.printStackTrace();
+}
+```
+
+### Serialization
+```java
+public class Person implements Serializable {
+    private String name;
+    private int age;
+    // constructors, getters, setters
+}
+
+// Serialize
+try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("person.ser"))) {
+    oos.writeObject(new Person("Alice", 25));
+}
+
+// Deserialize
+try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("person.ser"))) {
+    Person person = (Person) ois.readObject();
+    System.out.println(person.getName());
+}
+```
+
+## Multithreading
+
+Java supports multithreading for concurrent programming.
+
+### Creating Threads
+```java
+// Extending Thread class
+class MyThread extends Thread {
+    public void run() {
+        System.out.println("Thread is running");
+    }
+}
+
+// Implementing Runnable interface
+class MyRunnable implements Runnable {
+    public void run() {
+        System.out.println("Runnable is running");
+    }
+}
+
+// Usage
+Thread thread1 = new MyThread();
+Thread thread2 = new Thread(new MyRunnable());
+thread1.start();
+thread2.start();
+```
+
+### Synchronization
+```java
+class Counter {
+    private int count = 0;
+    
+    public synchronized void increment() {
+        count++;
+    }
+    
+    public int getCount() {
+        return count;
+    }
+}
+```
+
+### Executor Framework
+```java
+ExecutorService executor = Executors.newFixedThreadPool(5);
+for (int i = 0; i < 10; i++) {
+    executor.execute(() -> {
+        System.out.println("Task executed by " + Thread.currentThread().getName());
+    });
+}
+executor.shutdown();
+```
+
+## Lambda Expressions
+
+Lambda expressions provide a concise way to implement functional interfaces.
+
+```java
+// Before Java 8
+Runnable r = new Runnable() {
+    public void run() {
+        System.out.println("Hello");
+    }
+};
+
+// With lambda
+Runnable r = () -> System.out.println("Hello");
+
+// Functional interfaces
+interface MathOperation {
+    int operate(int a, int b);
+}
+
+MathOperation add = (a, b) -> a + b;
+System.out.println(add.operate(5, 3)); // 8
+```
+
+## Stream API
+
+The Stream API provides functional-style operations on streams of elements.
+
+```java
+List<String> names = Arrays.asList("Alice", "Bob", "Charlie", "David");
+
+// Filter and map
+List<String> result = names.stream()
+    .filter(name -> name.startsWith("A"))
+    .map(String::toUpperCase)
+    .collect(Collectors.toList());
+
+// forEach
+names.stream().forEach(System.out::println);
+
+// reduce
+int sum = IntStream.range(1, 5).reduce(0, (a, b) -> a + b);
+```
+
+## Java Date and Time API
+
+Java 8 introduced a new Date and Time API in the `java.time` package.
+
+```java
+// Current date
+LocalDate today = LocalDate.now();
+
+// Specific date
+LocalDate birthday = LocalDate.of(1990, Month.JANUARY, 1);
+
+// Date arithmetic
+LocalDate nextWeek = today.plusWeeks(1);
+
+// Formatting
+DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+String formattedDate = today.format(formatter);
+
+// Parsing
+LocalDate parsedDate = LocalDate.parse("25/12/2023", formatter);
+
+// Duration and Period
+Duration duration = Duration.between(LocalTime.now(), LocalTime.now().plusHours(2));
+Period period = Period.between(LocalDate.now(), LocalDate.now().plusDays(10));
+```
+
+## Annotations
+
+Annotations provide metadata about the code.
+
+### Built-in Annotations
+```java
+@Override
+public String toString() {
+    return "Custom toString";
+}
+
+@Deprecated
+public void oldMethod() {}
+
+@SuppressWarnings("unchecked")
+List list = new ArrayList();
+```
+
+### Custom Annotations
+```java
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+public @interface TestAnnotation {
+    String value() default "default";
+    int count() default 1;
+}
+
+// Usage
+@TestAnnotation(value = "test", count = 5)
+public void annotatedMethod() {}
+```
+
+## Java Database Connectivity (JDBC)
+
+JDBC is used to connect to databases.
+
+```java
+// Connection setup
+String url = "jdbc:mysql://localhost:3306/mydb";
+String username = "user";
+String password = "pass";
+
+try (Connection connection = DriverManager.getConnection(url, username, password)) {
+    // Statement
+    Statement statement = connection.createStatement();
+    ResultSet rs = statement.executeQuery("SELECT * FROM users");
+    
+    // PreparedStatement (prevents SQL injection)
+    PreparedStatement ps = connection.prepareStatement("INSERT INTO users VALUES (?, ?)");
+    ps.setString(1, "Alice");
+    ps.setInt(2, 25);
+    ps.executeUpdate();
+    
+    // Processing ResultSet
+    while (rs.next()) {
+        String name = rs.getString("name");
+        int age = rs.getInt("age");
+        System.out.println(name + ": " + age);
+    }
+} catch (SQLException e) {
+    e.printStackTrace();
+}
+```
+
+## Unit Testing with JUnit
+
+JUnit is a popular testing framework for Java.
+
+```java
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+class CalculatorTest {
+    
+    @Test
+    void testAdd() {
+        Calculator calculator = new Calculator();
+        assertEquals(5, calculator.add(2, 3));
+    }
+    
+    @Test
+    void testDivide() {
+        Calculator calculator = new Calculator();
+        assertThrows(ArithmeticException.class, () -> calculator.divide(1, 0));
+    }
+}
+
+class Calculator {
+    public int add(int a, int b) {
+        return a + b;
+    }
+    
+    public int divide(int a, int b) {
+        if (b == 0) {
+            throw new ArithmeticException("Division by zero");
+        }
+        return a / b;
+    }
+}
+```

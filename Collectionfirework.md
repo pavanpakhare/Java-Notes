@@ -1,3 +1,69 @@
+code 
+```java
+// Java Collections Cheat Sheet with Code Snippets
+
+import java.util.*;
+
+public class CheatSheet { public static void main(String[] args) { // List add List<Integer> list = new ArrayList<>(); list.add(10);
+
+// Deque addFirst / addLast
+    Deque<Integer> deque = new ArrayDeque<>();
+    deque.addFirst(1);
+    deque.addLast(2);
+
+    // Queue offer / poll / peek
+    Queue<Integer> queue = new LinkedList<>();
+    queue.offer(3);
+    int head = queue.peek();
+    queue.poll();
+
+    // Contains
+    boolean hasElement = list.contains(10);
+
+    // List get
+    int val = list.get(0);
+
+    // Map put / get / keySet / entrySet / remove
+    Map<String, Integer> map = new HashMap<>();
+    map.put("a", 1);
+    int value = map.get("a");
+    Set<String> keys = map.keySet();
+    Set<Map.Entry<String, Integer>> entries = map.entrySet();
+    map.remove("a");
+
+    // Size / isEmpty / clear
+    int size = list.size();
+    boolean empty = list.isEmpty();
+    list.clear();
+
+    // Sort / reverse / max / min
+    Collections.sort(list);
+    Collections.reverse(list);
+    int maximum = Collections.max(list);
+    int minimum = Collections.min(list);
+
+    // Binary search (sorted list)
+    Collections.sort(list);
+    int index = Collections.binarySearch(list, 10);
+
+    // Fill / frequency
+    Collections.fill(list, 5);
+    int freq = Collections.frequency(list, 5);
+
+    // Copy
+    List<Integer> copyFrom = Arrays.asList(1, 2, 3);
+    List<Integer> copyTo = new ArrayList<>(Arrays.asList(0, 0, 0));
+    Collections.copy(copyTo, copyFrom);
+
+    // Stream filter/map/reduce
+    List<Integer> streamList = Arrays.asList(1, 2, 3, 4, 5);
+    List<Integer> evens = streamList.stream().filter(x -> x % 2 == 0).toList();
+    List<Integer> squared = streamList.stream().map(x -> x * x).toList();
+    int sum = streamList.stream().reduce(0, Integer::sum
+
+```
+
+
 # Java Collections – Functions with Time and Space Complexity
 
 A quick reference for competitive programming using Java Collections Framework.
